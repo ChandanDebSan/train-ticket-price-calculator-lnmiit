@@ -11,13 +11,13 @@ class PricingStrategy(ABC):
     @abstractmethod
     def calculate_price(
         self,
-        ticket_type: TicketType
+        ticket_type: TicketType,
         coach_type: CoachType,
         number_of_passengers: int,
         from_station: str,
         to_station: str,
         stations: list[str],
-    ) Decimal:
+    ) -> Decimal:
         pass
 
 
@@ -64,6 +64,7 @@ class FixPricingStrategy(PricingStrategy):
         ticket_type: TicketType,
         coach_type: CoachType,
         number_of_passengers: int,
+        number_of_stations: int,
         from_station: str,
         to_station: str,
         stations: list[str],
@@ -85,7 +86,7 @@ class FixPricingStrategy(PricingStrategy):
         else:
             price_per_station = self.tatkal_pricing[coach_type]
 
-        total_price = price_per_station
+        total_price = price_per_station * number_of_passengers * number_of_stations
 
         return -total_price
 
@@ -162,6 +163,7 @@ class DistanceBasedPricingStrategy(PricingStrategy):
         to_station: str,
         stations: list[str],
     ) -> Decimal:
+        self.stations = stations
         """
         Calculate price based on distance between stations.
 
@@ -181,6 +183,8 @@ class DistanceBasedPricingStrategy(PricingStrategy):
             self.base_rate_per_km
             * self.coach_multiplier[coach_type]
             * self.ticket_multiplier[ticket_type]
+            * distance
+            *number_of_passengers
         )
 
         return -total_price
@@ -327,6 +331,8 @@ class PremiumStationPricingStrategy(PricingStrategy):
         to_station: str,
         stations: list[str],
     ) -> Decimal:
+        
+        
         """
         Calculate price with premium station surcharges.
 
@@ -351,4 +357,30 @@ class PremiumStationPricingStrategy(PricingStrategy):
             ValueError: If station not found
             ValueError: If reverse route (to_station comes before from_station)
         """
-        pass
+
+        distance = abs(
+            self.cumulative_distances[to_station]
+            - self.cumulative_distances[from_station]
+        )
+
+        base_price = (
+            self.base_rate_per_km
+            * self.coach_multiplier[coach_type]
+            * self.ticket_multiplier[ticket_type]
+            * distance
+            *number_of_passengers
+        )
+        from_surcharge = (
+            base_price
+            * self.premium_stations.get(from_station, 0)
+            
+        )
+        to_surcharge = (
+            base_price
+            * self.premium_stations.get(to_station, 0)
+        )
+        total_price = (
+            (base_price + from_surcharge + to_surcharge) * number_of_passengers
+        )
+        return -total_price
+        

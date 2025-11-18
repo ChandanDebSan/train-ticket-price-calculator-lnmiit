@@ -15,6 +15,7 @@ class Train:
     ):
         self.train_number = train_number
         self.pricing_strategy = pricing_strategy
+        self.stations = stations
 
     def calculate_ticket_price(
         self,
@@ -24,6 +25,11 @@ class Train:
         from_station: str,
         to_station: str,
     ) -> Decimal:
+        self.ticket_type = ticket_type
+        self.coach_type = coach_type
+        self.number_of_passangers = number_of_passengers
+        self.from_station = from_station
+        self.to_station = to_station
         """
         Calculate ticket price for this train.
 
@@ -38,3 +44,5 @@ class Train:
             Total price for the tickets
         """
         return Decimal(0)
+    
+        

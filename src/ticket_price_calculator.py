@@ -10,7 +10,7 @@ class TicketPriceCalculator:
     """Calculator for ticket prices across multiple trains."""
 
     def __init__(self, trains: list[Train]):
-        self.trains: dict[str, Train] = {train.train_number: train for train trains}
+        self.trains: dict[str, Train] = {train.train_number: train for train in trains}
 
     def calculate(
         self,
@@ -39,11 +39,12 @@ class TicketPriceCalculator:
             ValueError: If train not found or invalid route
         """
 
-        train = self.trains["12345"]
+        train = self.trains.get('12345')
         return train.calculate_ticket_price(
             ticket_type=ticket_type,
             coach_type=coach_type,
             number_of_passengers=number_of_passengers,
             from_station=from_station,
             to_station=to_station,
+            train_number=train_number
         )
